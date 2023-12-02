@@ -56,3 +56,32 @@ fn get_numbers(line: &str) -> Vec<u32> {
 
     digits
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_part_1_example() {
+        let input = "\
+            1abc2\n\
+            pqr3stu8vwx\n\
+            a1b2c3d4e5f\n\
+            treb7uchet";
+
+        assert_eq!(part_one(input).to_string(), "142");
+    }
+
+    #[test]
+    fn test_part_2_example_1() {
+        let input = "\
+            two1nine\n\
+            eightwothree\n\
+            abcone2threexyz\n\
+            xtwone3four\n\
+            4nineeightseven2\n\
+            zoneight234\n\
+            7pqrstsixteen";
+        assert_eq!(part_two(input).to_string(), "281");
+    }
+}
