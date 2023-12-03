@@ -25,6 +25,7 @@ fn main() -> Result<()> {
     let solution = match args.day {
         1 => solutions::day_01::solve(&read_file(args.day)),
         2 => solutions::day_02::solve(&read_file(args.day)),
+        3 => solutions::day_03::solve(&read_file(args.day)),
         _ => return Err(anyhow!("Invalid day: {}", args.day)),
     };
 
