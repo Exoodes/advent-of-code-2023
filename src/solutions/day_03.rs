@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 pub fn solve(input: &str) -> String {
     format!("{:?}\n{:?}\n", part_one(input), part_two(input))
 }
