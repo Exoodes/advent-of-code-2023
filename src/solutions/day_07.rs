@@ -29,7 +29,7 @@ fn get_card_order(a: char, b: char) -> std::cmp::Ordering {
     map.insert('A', 1);
     map.insert('K', 2);
     map.insert('Q', 3);
-    map.insert('J', 40);
+    map.insert('J', 4);
     map.insert('T', 5);
     map.insert('9', 6);
     map.insert('8', 7);
@@ -77,7 +77,7 @@ impl PartialOrd for Hand<'_> {
     }
 }
 
-fn hand_type_from_letter_count(map: &HashMap<char, i32>) -> HandType {
+fn hand_type_from_letter_count(map: &HashMap<char, usize>) -> HandType {
     match map.len() {
         1 => HandType::FiveOfKind,
         2 => {
@@ -100,21 +100,86 @@ fn hand_type_from_letter_count(map: &HashMap<char, i32>) -> HandType {
     }
 }
 
-fn get_hand_type(hand: &str) -> HandType {
-    let letter_counts: HashMap<char, i32> = hand.chars().fold(HashMap::new(), |mut map, c| {
+fn get_letter_count(hand: &str) -> HashMap<char, usize> {
+    hand.chars().fold(HashMap::new(), |mut map, c| {
         *map.entry(c).or_insert(0) += 1;
         map
-    });
+    })
+}
 
-    hand_type_from_letter_count(&letter_counts)
+fn generate_strings(input: String) -> Vec<String> {
+    let possible_letters = [
+        'A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J',
+    ];
+
+    let mut result = Vec::new();
+    let mut current_string = String::new();
+
+    generate_strings_recursive(
+        &input,
+        &possible_letters,
+        0,
+        &mut current_string,
+        &mut result,
+    );
+
+    result
+}
+
+fn generate_strings_recursive(
+    input: &str,
+    possible_letters: &[char],
+    index: usize,
+    current_string: &mut String,
+    result: &mut Vec<String>,
+) {
+    if index == input.len() {
+        result.push(current_string.clone());
+        return;
+    }
+
+    if input.chars().nth(index) == Some('J') {
+        for &letter in possible_letters.iter() {
+            current_string.push(letter);
+            generate_strings_recursive(input, possible_letters, index + 1, current_string, result);
+            current_string.pop();
+        }
+    } else {
+        current_string.push(input.chars().nth(index).unwrap());
+        generate_strings_recursive(input, possible_letters, index + 1, current_string, result);
+        current_string.pop();
+    }
+}
+
+fn get_hand_type(hand: &str, joker: bool) -> HandType {
+    let mut all_hands = vec![hand.to_string()];
+    if joker {
+        all_hands = generate_strings(hand.to_string());
+    }
+
+    all_hands
+        .iter()
+        .map(|hand| get_letter_count(hand))
+        .map(|m| hand_type_from_letter_count(&m))
+        .sorted()
+        .next()
+        .unwrap()
 }
 
 pub fn part_one(input: &str) -> usize {
+    solver(input, false)
+}
+
+pub fn part_two(input: &str) -> usize {
+    solver(input, true)
+}
+
+fn solver(input: &str, joker: bool) -> usize {
     input
         .lines()
         .map(|s| s.split_whitespace().collect::<Vec<_>>())
         .map(|s| Hand {
-            hand_type: get_hand_type(s[0]),
+            hand_type: get_hand_type(s[0], joker),
             cards: s[0],
             value: s[1].parse::<usize>().unwrap(),
         })
@@ -123,10 +188,6 @@ pub fn part_one(input: &str) -> usize {
         .enumerate()
         .map(|(i, h)| (i + 1) * h.value)
         .sum()
-}
-
-pub fn part_two(_input: &str) -> usize {
-    0
 }
 
 #[cfg(test)]
