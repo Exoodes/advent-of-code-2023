@@ -3,6 +3,14 @@ pub fn solve(input: &str) -> String {
 }
 
 pub fn part_one(input: &str) -> i64 {
+    solver(input, true)
+}
+
+pub fn part_two(input: &str) -> i64 {
+    solver(input, false)
+}
+
+fn solver(input: &str, part: bool) -> i64 {
     input
         .lines()
         .map(|s| {
@@ -11,13 +19,28 @@ pub fn part_one(input: &str) -> i64 {
                 .collect::<Vec<_>>()
         })
         .map(|l| compute_lines(l.clone()))
-        .map(|l| l.iter().map(|l| l.last().unwrap()).sum::<i64>())
+        .map(|l| {
+            if part {
+                compute_first_part(l)
+            } else {
+                compute_second_part(l)
+            }
+        })
         .sum::<i64>()
 }
 
+fn compute_first_part(values: Vec<Vec<i64>>) -> i64 {
+    values.iter().map(|l| l.last().unwrap()).sum::<i64>()
+}
 
-pub fn part_two(_input: &str) -> i64 {
-    0
+fn compute_second_part(values: Vec<Vec<i64>>) -> i64 {
+    let mut out = 0;
+
+    for l in values.iter().rev() {
+        out = l[0] - out;
+    }
+
+    out
 }
 
 fn compute_lines(initial_values: Vec<i64>) -> Vec<Vec<i64>> {
